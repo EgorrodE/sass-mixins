@@ -1,0 +1,40 @@
+$desktop: 1267px
+$tablet: 1023px
+$mobile: 767px
+
+
+
+@mixin media-width-between($min, $max)
+  @media (min-width: $min) and (max-width: $max)
+    @content
+
+@mixin media-width-above($min)
+  @media (min-width: $min)
+    @content
+
+@mixin media-width-below($max)
+  @media (max-width: $max)
+    @content
+
+
+
+
+@mixin media-xxs //extra small mobile
+  @include media-width-below(450px)
+    @content
+
+@mixin media-xs //mobile
+  @include media-width-below($mobile)
+    @content
+
+@mixin media-sm //tablet portrait
+  @include media-width-below($tablet)
+    @content
+
+@mixin media-md //tablet landscape
+  @include media-width-below($desktop)
+    @content
+
+@mixin media-lg //desktop
+  @include media-width-above($desktop)
+    @content

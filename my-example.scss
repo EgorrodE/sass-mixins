@@ -1,0 +1,173 @@
+$breakpoints:       xs    sm    md    lg    xl     fullwidth;
+$media-breakpoints:       sm    md    lg    xl     fullwidth;
+$widths:            375px 576px 768px 992px 1200px 1600px;
+$margins:           25px  25px  25px  50px  50px   100px;
+$paddings:          0px   0px   45px  65px  50px   90px;
+
+
+@function value-by-breakpoint($values, $bp) {
+  @return nth($values, index($breakpoints, $bp));
+};
+
+
+@function width($breakpoint) {
+  @return value-by-breakpoint($widths, $breakpoint);
+}
+
+@function margin($breakpoint) {
+  @return value-by-breakpoint($margins, $breakpoint);
+}
+
+@function padding($breakpoint) {
+  @return value-by-breakpoint($paddings, $breakpoint);
+}
+
+
+
+
+
+@mixin media-breakpoint-up-width ($size) {
+  @if index($media-breakpoints, $size) {
+    @media (min-width: #{width($size)}) {
+      @content;
+    }
+  }
+  @else {
+    @media (min-width: $size) {
+      @content;
+    }
+  }
+}
+
+@mixin media-breakpoint-down-width ($size) {
+  @if index($media-breakpoints, $size) {
+    @media (max-width: #{width($size) - 1px}) {
+      @content;
+    }
+  }
+  @else {
+    @media (max-width: $size) {
+      @content;
+    }
+  }
+}
+@mixin media-breakpoint-between-width ($min, $max) {
+  $min-width: $min;
+  $max-width: $max;
+  @if index($breakpoints, $min) {
+    $min-width: width($min);
+  }
+  @if index($breakpoints, $max) {
+    $max-width: width($max);
+  }
+  @media (min-width: $min-width) and (max-width: #{$max-width - 1px}) {
+    @content;
+  }
+}
+
+
+
+
+@mixin by-breakpoints($property, $values, $with-breakpoints: $breakpoints) {
+  $i-start: 1;
+  @if index($with-breakpoints, xs) {
+    #{$property}: nth($values, 1);
+    $i-start: 2;
+  }
+  @for $i from $i-start through length($values) {
+    @include media-breakpoint-up-width(nth($with-breakpoints, $i)) {
+      #{$property}: nth($values, $i);
+    }
+  }
+}
+
+h6 {
+  @include by-breakpoints(font-size, (1.6rem 1.8rem 2rem), (xs xl fullwidth));
+  @include by-breakpoints(line-height, (2.1rem 2.3rem 2.5rem),(xs xl fullwidth));
+  @include by-breakpoints(letter-spacing, (-0.42px -0.46px),(xl fullwidth));
+}
+
+
+
+
+
+
+@mixin by-breakpoint-margin($properties, $with-breakpoints: $breakpoints) {
+  @if index($with-breakpoints, xs) {
+    @each $property in $properties {
+      #{$property}: margin(xs);
+    }
+  }
+  @each $bp in $with-breakpoints {
+    @if index($media-breakpoints, $bp) {
+      @include media-breakpoint-up-width($bp) {
+        @each $property in $properties {
+          #{$property}: margin($bp);
+        }
+      }
+    }
+  }
+}
+
+.container {
+  @include by-breakpoint-margin(padding-left padding-right);
+}
+.pad-section {
+  @include by-breakpoint-margin((padding-top padding-bottom), (xs sm md));
+  @include by-breakpoint-padding((padding-top padding-bottom), (lg xl fullwidth));
+}
+
+
+
+@mixin by-multi-margin($properties, $multiplier, $with-breakpoints: $breakpoints) {
+  @if index($with-breakpoints, xs) {
+    @each $property in $properties {
+      #{$property}: margin(xs) * $multiplier;
+    }
+  }
+  @each $bp in $with-breakpoints {
+    @if index($media-breakpoints, $bp) {
+      @include media-breakpoint-up-width($bp) {
+        @each $property in $properties {
+          #{$property}: margin($bp) * $multiplier;
+        }
+      }
+    }
+  }
+}
+
+@for $multiplier from 2 through 4 {
+  .pad-section-#{$multiplier} {
+    @include by-multi-margin(
+      (padding-top padding-bottom),
+      $multiplier,
+      (xs sm md)
+    );
+    @include by-multi-padding(
+      (padding-top padding-bottom),
+      $multiplier,
+      (lg xl fullwidth)
+    );
+  }
+}
+
+
+
+
+.fullscreen {
+  height: 100vh;
+  min-height: 768px;
+  max-height: 2000px;
+}
+@each $bp in $media-breakpoints {
+  .fullscreen-#{$bp} {
+    height: 100%;
+    min-height: unset;
+    max-height: unset;
+    @include media-breakpoint-up-width($bp) {
+      height: 100vh;
+      min-height: 768px;
+      max-height: 2000px;
+    }
+  }
+}
